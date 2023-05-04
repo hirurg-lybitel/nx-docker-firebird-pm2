@@ -1,0 +1,51 @@
+FROM jacobalberty/firebird:v3 as builder
+WORKDIR /usr/app
+
+ARG NX_SERVER_PORT
+ARG NX_HOST_IP
+
+ENV NX_SERVER_PORT=$NX_SERVER_PORT
+ENV NX_HOST_IP=$NX_HOST_IP
+
+RUN echo "NX_HOST_IP is set to $NX_HOST_IP" && \
+    echo "NX_SERVER_PORT is set to $NX_SERVER_PORT"
+
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    musl \
+    curl \
+    sudo \
+    g++ \
+    make \
+    python3-pip && \
+    curl -sL https://deb.nodesource.com/setup_19.x | bash - && \
+    apt-get install -y nodejs && \
+    sudo npm install yarn -g && \
+    sudo yarn global add pm2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+RUN yarn install --network-timeout 1000000 --immutable --immutable-cache --check-cache --parallel && \
+    yarn cache clean && \
+    yarn build
+
+FROM builder as server
+WORKDIR /usr/app
+
+# RUN sudo yarn global add pm2
+
+ENV PM2_PUBLIC_KEY 2g0zthb6mp3oq16
+ENV PM2_SECRET_KEY 4ml4ivoyodxnapp
+
+ENTRYPOINT ["pm2-runtime", "start", "pm2.config.js"]
+
+
+FROM nginx:stable-alpine3.17-slim as react
+COPY --from=builder /usr/app/dist/apps/app-1  /usr/share/nginx/html
+
+RUN echo "NX_HOST_IP_2 is set to $NX_HOST_IP" && \
+    echo "NX_SERVER_PORT_2 is set to $NX_SERVER_PORT"
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
