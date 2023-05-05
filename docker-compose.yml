@@ -7,9 +7,9 @@ services:
       context: .
       dockerfile: DockerFile
       target: server
-      # args:
-      #   - NX_SERVER_PORT=${NX_SERVER_PORT}
-      #   - NX_HOST_IP=${NX_HOST_IP}
+      args:
+        - NX_SERVER_PORT=${NX_SERVER_PORT}
+        - NX_HOST_IP=${NX_HOST_IP}
     container_name: server
     ports:
       - "${NX_SERVER_PORT}:${NX_SERVER_PORT}"
