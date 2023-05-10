@@ -7,7 +7,6 @@
     "start:dev": "yarn nx run-many --parallel --target=serve --projects=api-1,app-1",
     "start:prod": "yarn build && yarn nx run-many --parallel --target=serve --projects=api-1,app-1 --prod",
     "build": "yarn nx run-many --target=build --all --parallel --prod",
-    "build2": "yarn nx run-many --parallel --target=build --projects=app-1 --prod",
     "pm2:start": "pm2 start dist/apps/api-1/main.js --watch --name api-1",
     "pm2:stop": "pm2 stop api-1"
   },
