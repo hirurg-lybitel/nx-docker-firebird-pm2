@@ -1,32 +1,29 @@
-version: '3'
-
 services:
-  back:
-    image: server:v4
+  client:
+    image: client
     build:
       context: .
-      dockerfile: DockerFile
+      dockerfile: Dockerfile
+      target: client
+      args:
+        - NX_HOST_IP=${NX_HOST_IP}
+        - NX_SERVER_PORT=${NX_SERVER_PORT}
+        - NX_BRANCH=dockering
+    ports:
+      - ${NX_APP_PORT}:80
+    env_file:
+      - ./.env
+  server:
+    image: server
+    hostname: gdmn.crm
+    build:
+      context: .
+      dockerfile: Dockerfile
       target: server
       args:
-        - NX_SERVER_PORT=${NX_SERVER_PORT}
-        - NX_HOST_IP=${NX_HOST_IP}
+        - NX_BRANCH=dockering
     container_name: server
     ports:
       - "${NX_SERVER_PORT}:${NX_SERVER_PORT}"
     env_file:
-      - .env
-  app:
-    image: react:v4
-    build:
-      context: .
-      dockerfile: DockerFile
-      target: react
-      args:
-        - NX_HOST_IP=${NX_HOST_IP}
-        - NX_SERVER_PORT=${NX_SERVER_PORT}
-    container_name: react
-    ports:
-      - ${NX_APP_PORT}:80
-      - 5200:80
-    env_file:
-      - .env
+      - ./.env

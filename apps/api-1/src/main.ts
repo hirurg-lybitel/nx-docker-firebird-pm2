@@ -5,10 +5,9 @@ import { config } from '@nx-docker-firebird-pm2/config';
 import cors from 'cors';
 import path from 'path';
 
-// dotenv.config({ path: '../..' });
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-const host = config.host;
+const host = config.serverHost;
 const port = config.serverPort;
 
 const dataBaseName = process.env.NODE_FB_DB ?? '';
@@ -22,12 +21,9 @@ const app = express();
 
 app.use(cors({
   credentials: true,
-  origin: `http://localhost:${config.appPort}`
+  origin: `http://${config.host}:${config.appPort}`,
 }));
 
-console.log('config', process.env.NODE_ENV, config, process.env.REACT_APP_VARIABLE);
-
-app.use(express.static(path.resolve(__dirname, '../app-1')));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,12 +46,6 @@ app.get('/usersCount', async (req: Request, res: Response) => {
 app.get('/', (req, res) => {
   res.send({ message: 'Hello API' });
 });
-
-if (process.env.NODE_ENV !== 'development') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../app-1', 'index.html'));
-  });
-};
 
 app.listen(port, host, () => {
   console.log(`[ ready ] http://${host}:${port}`);
