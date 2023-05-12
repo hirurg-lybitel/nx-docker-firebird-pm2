@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { config } from '@nx-docker-firebird-pm2/config';
 import cors from 'cors';
 import path from 'path';
+import { wrapForNamedParams } from './named-params';
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -34,7 +35,7 @@ app.get('/usersCount', async (req: Request, res: Response) => {
   const attachment = await client.connect(fullDbName, { username, password });
 	const transaction = await attachment.startTransaction();
 
-	const result = await attachment.executeSingletonAsObject(transaction, 'select count(*) as NUMBER from gd_user');
+	const result = await attachment.executeSingletonAsObject<{ NUMBER: number }>(transaction, 'select count(*) as NUMBER from gd_user');
 
 	await transaction.commit();
   await attachment.disconnect()
